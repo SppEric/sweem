@@ -1,10 +1,6 @@
 import torch
 from tqdm import tqdm
-from collections import Counter 
-from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
-
-batch_size = 4
+from collections import Counter
 
 def train_loop(model, optimizer, num_epochs, train_dataloader, validation_dataloader, lr_scheduler, device):
   """

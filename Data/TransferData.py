@@ -1,8 +1,5 @@
 import pandas as pd
-import numpy as np
-import random
 import os
-
 
 def TransferData(input_path, omics_data_file, module_file, output_path):
     if os.path.exists(output_path):
@@ -158,7 +155,7 @@ def TransferDataWithClinical(input_path, omics_data_file, module_file, output_pa
     return train_output, test_output, val_output
 
 
-input_path = "./Data/"
+input_path = "./"
 module_file = "pathway_module.csv"
 
 # single omic data ###############################

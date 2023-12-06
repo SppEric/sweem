@@ -45,6 +45,7 @@ class SelfAttentionModel(nn.Module):
         self.self_attention = SelfAttention(hidden_dim_1)
         self.dense1 = nn.Linear(hidden_dim_1, hidden_dim_2)
         self.dense2 = nn.Linear(hidden_dim_2, 1)
+        # TODO multi head attention
 
     def forward(self, x):
         embedded = self.embedding(x)
