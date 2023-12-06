@@ -39,20 +39,21 @@ class CrossAttention(nn.Module):
         return weighted
 
 class SelfAttentionModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim):
+    def __init__(self, input_dim, hidden_dim_1, hidden_dim_2):
         super(SelfAttentionModel, self).__init__()
-        self.embedding = nn.Linear(input_dim, hidden_dim)
-        self.self_attention = SelfAttention(hidden_dim)
-        self.months = nn.Linear(hidden_dim, 1)
-        self.event = nn.Linear(hidden_dim, 1)
+        self.embedding = nn.Linear(input_dim, hidden_dim_1)
+        self.self_attention = SelfAttention(hidden_dim_1)
+        self.dense1 = nn.Linear(hidden_dim_1, hidden_dim_2)
+        self.dense2 = nn.Linear(hidden_dim_2, 1)
 
     def forward(self, x):
         embedded = self.embedding(x)
         self_attention = self.self_attention(embedded)
-        event = self.event(self_attention)
-        event = torch.sigmoid(event)
-        months = self.months(self_attention)
-        return event, months
+        dense1 = self.dense1(self_attention)
+        act1 = F.relu(dense1)
+        dense2 = self.dense2(act1)
+        event = torch.sigmoid(dense2)
+        return event
 
 class CrossAttentionModel(nn.Module):
     def __init__(self, mutation_dim, expression_dim, methylation_dim, cna_dim, hidden_dim):
