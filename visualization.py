@@ -1,0 +1,3 @@
+def getAttentionLayerOutput(model, input):
+    # TODO
+    ...
