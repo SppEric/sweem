@@ -9,15 +9,17 @@ class SelfAttention(nn.Module):
         self.query = nn.Linear(input_dim, input_dim)
         self.key = nn.Linear(input_dim, input_dim)
         self.value = nn.Linear(input_dim, input_dim)
-        self.softmax = nn.Softmax(dim=2)
+        self.softmax = nn.Softmax(dim=1)
         
     def forward(self, x):
         queries = self.query(x)
         keys = self.key(x)
         values = self.value(x)
-        scores = torch.bmm(queries, keys.transpose(1, 2)) / (self.input_dim ** 0.5)
-        attention = self.softmax(scores)
-        weighted = torch.bmm(attention, values)
+        scores = torch.mm(queries, keys.transpose(0,1)) / (self.input_dim ** 0.5)
+        s = nn.Softmax(dim=1)
+        attention = s(scores)   
+        #attention = self.softmax(scores)
+        weighted = torch.mm(attention, values)
         return weighted
 
 class CrossAttention(nn.Module):
