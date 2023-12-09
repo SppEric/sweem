@@ -1,25 +1,25 @@
 import torch
 
 def R_set(x):
-	n_sample = x.size(0)
-	matrix_ones = torch.ones(n_sample, n_sample)
-	indicator_matrix = torch.tril(matrix_ones)
-	return(indicator_matrix)   
+    n_sample = x.size(0)
+    matrix_ones = torch.ones(n_sample, n_sample)
+    indicator_matrix = torch.tril(matrix_ones)
+    return(indicator_matrix)   
 
 def neg_par_log_likelihood(pred, ytime, yevent):
-	n_observed = yevent.sum(0)
-	ytime_indicator = R_set(ytime)
-	if torch.cuda.is_available():
-		ytime_indicator = ytime_indicator.cuda()
-	risk_set_sum = ytime_indicator.mm(torch.exp(pred)) 
-	#print(pred)
-	diff = pred - torch.log(risk_set_sum)
-	yevent = yevent.cuda().float().reshape(-1, 1)
-	#print(yevent.shape)
-	sum_diff_in_observed = torch.transpose(diff, 0, 1).mm(yevent)
-	cost = (- (torch.sum(sum_diff_in_observed / n_observed))).reshape((-1,))
-	
-	return(cost)
+    n_observed = yevent.sum(0)
+    ytime_indicator = R_set(ytime)
+    if torch.cuda.is_available():
+        ytime_indicator = ytime_indicator.cuda()
+    risk_set_sum = ytime_indicator.mm(torch.exp(pred)) 
+    #print(pred)
+    diff = pred - torch.log(risk_set_sum)
+    yevent = yevent.cuda().float().reshape(-1, 1)
+    #print(yevent.shape)
+    sum_diff_in_observed = torch.transpose(diff, 0, 1).mm(yevent)
+    cost = (- (torch.sum(sum_diff_in_observed / n_observed))).reshape((-1,))
+    
+    return(cost)
 
 def temp_loss(pred, ytime, yevent):
     """
@@ -33,8 +33,8 @@ def temp_loss(pred, ytime, yevent):
     Returns:
     Cost: Calculated negative partial log likelihood.
     """
-	n_sample = ytime.size(0)
-	yevent = yevent.view(-1)
+    n_sample = ytime.size(0)
+    yevent = yevent.view(-1)
     pred = pred.view(-1)
 
     # Create lower triangular matrix of ones (Risk set matrix)
