@@ -2,6 +2,26 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class DeepOmixNet(nn.Module):
+    def __init__(self, In_Nodes, Pathway_Nodes, Hidden_Nodes, Out_Nodes,Pathway_Mask):
+        super(DeepOmixNet, self).__init__()
+        self.embedding = nn.Linear(In_Nodes, Hidden_Nodes)
+        self.self_attention = SelfAttention(Hidden_Nodes)
+        self.dense1 = nn.Linear(Hidden_Nodes, 32)
+        self.dense2 = nn.Linear(32, 1)
+        self.dense3 = nn.Linear(2, 1)
+
+    def forward(self, x_1, x_2):
+        embedded = self.embedding(x_1)
+        self_attention = self.self_attention(embedded)
+        dense1 = self.dense1(self_attention)
+        act1 = F.relu(dense1)
+        dense2 = self.dense2(act1)
+        cat = torch.cat((dense2, x_2), dim=1)
+        out = self.dense3(cat)
+        risk_score = torch.sigmoid(out)
+        return risk_score
+
 class SelfAttention(nn.Module):
     def __init__(self, input_dim):
         super(SelfAttention, self).__init__()
@@ -81,20 +101,3 @@ class CrossAttentionModel(nn.Module):
         expression_attention = self.self_attention(expression_embedded)
         methylation_attention = self.self_attention(methylation_embedded)
         cna_attention = self.self_attention(cna_embedded)
-
-class DeepOmixNet(nn.Module):
-    def __init__(self, In_Nodes, Pathway_Nodes, Hidden_Nodes, Out_Nodes,Pathway_Mask):
-        super(DeepOmixNet, self).__init__()
-        self.embedding = nn.Linear(In_Nodes, Hidden_Nodes)
-        self.self_attention = SelfAttention(Hidden_Nodes)
-        self.dense1 = nn.Linear(Hidden_Nodes, 32)
-        self.dense2 = nn.Linear(32, 1)
-
-    def forward(self, x_1, x_2):
-        embedded = self.embedding(x)
-        self_attention = self.self_attention(embedded)
-        dense1 = self.dense1(self_attention)
-        act1 = F.relu(dense1)
-        dense2 = self.dense2(act1)
-        risk_score = torch.sigmoid(dense2)
-        return risk_score
