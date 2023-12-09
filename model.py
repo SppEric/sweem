@@ -16,9 +16,7 @@ class SelfAttention(nn.Module):
         keys = self.key(x)
         values = self.value(x)
         scores = torch.mm(queries, keys.transpose(0,1)) / (self.input_dim ** 0.5)
-        s = nn.Softmax(dim=1)
-        attention = s(scores)   
-        #attention = self.softmax(scores)
+        attention = self.softmax(scores)   
         weighted = torch.mm(attention, values)
         return weighted
 
@@ -41,13 +39,14 @@ class CrossAttention(nn.Module):
         return weighted
 
 class SelfAttentionModel(nn.Module):
+    # TODO multi head attention
+    
     def __init__(self, input_dim, hidden_dim_1, hidden_dim_2):
         super(SelfAttentionModel, self).__init__()
         self.embedding = nn.Linear(input_dim, hidden_dim_1)
         self.self_attention = SelfAttention(hidden_dim_1)
         self.dense1 = nn.Linear(hidden_dim_1, hidden_dim_2)
         self.dense2 = nn.Linear(hidden_dim_2, 1)
-        # TODO multi head attention
 
     def forward(self, x):
         embedded = self.embedding(x)
@@ -55,8 +54,8 @@ class SelfAttentionModel(nn.Module):
         dense1 = self.dense1(self_attention)
         act1 = F.relu(dense1)
         dense2 = self.dense2(act1)
-        event = torch.sigmoid(dense2)
-        return event
+        risk_score = torch.sigmoid(dense2)
+        return risk_score
 
 class CrossAttentionModel(nn.Module):
     def __init__(self, mutation_dim, expression_dim, methylation_dim, cna_dim, hidden_dim):
