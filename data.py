@@ -1,4 +1,5 @@
 import pandas as pd
+import torch
 
 train_data = pd.read_csv('./Data/Multiple/train.csv')
 print(train_data.shape)
@@ -26,3 +27,22 @@ def getValidationDataloader(batch_size):
 def getTestDataLoader(batch_size):
     # TODO
     ...
+
+def sortData(path):	
+	data = pd.read_csv(path)
+	data.sort_values("OS_MONTHS", ascending = False, inplace = True)
+	x = data.drop(["SAMPLE_ID", "OS_MONTHS", "OS_EVENT"], axis = 1).values
+	ytime = data.loc[:, ["OS_MONTHS"]].values
+	yevent = data.loc[:, ["OS_EVENT"]].values
+	return(x, ytime, yevent)
+
+def loadData(path, dtype):
+	x, ytime, yevent = sortData(path)
+	X = torch.from_numpy(x).type(dtype)
+	YTIME = torch.from_numpy(ytime).type(dtype)
+	YEVENT = torch.from_numpy(yevent).type(dtype)
+	if torch.cuda.is_available():
+		X = X.cuda()
+		YTIME = YTIME.cuda()
+		YEVENT = YEVENT.cuda()
+	return(X, YTIME, YEVENT)

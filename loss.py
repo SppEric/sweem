@@ -33,11 +33,8 @@ def temp_loss(pred, ytime, yevent):
     Returns:
     Cost: Calculated negative partial log likelihood.
     """
-	print(ytime)
-	print(yevent)
-	
 	n_sample = ytime.size(0)
-    yevent = yevent.view(-1)
+	yevent = yevent.view(-1)
     pred = pred.view(-1)
 
     # Create lower triangular matrix of ones (Risk set matrix)
