@@ -176,7 +176,7 @@ module_file = "pathway_module.csv"
 # multiple omic data ###############################
 
 # multiple omic data input
-omics_data_file = ["rna", "scna", "mutation", "methy"]
+omics_data_file = ["rna", "scna", "methy"]
 
 # multiple omic data output path
 output_path = input_path + "Multiple/"
