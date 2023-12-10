@@ -53,7 +53,7 @@ def process_and_save_omics_data(input_dir, omics_file_names, output_dir):
     # Process and join clinical data
     clinical_data.set_index('sample_id', inplace=True)
     clinical_data_subset = clinical_data.loc[patient_ids_list, ["ostime", "status"]]
-    clinical_data_subset.columns = ["OS_MONTHS", "OS_EVENT"]
+    clinical_data_subset.columns = ["OS_DAYS", "OS_EVENT"]
 
     # Combine omics data with clinical data
     final_dataset = combined_omics_data.join(clinical_data_subset)

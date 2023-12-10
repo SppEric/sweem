@@ -45,12 +45,15 @@ class SelfAttentionModel(nn.Module):
         self.self_attention = SelfAttention(hidden_dim_1)
         self.dense1 = nn.Linear(hidden_dim_1, hidden_dim_2)
         self.dense2 = nn.Linear(hidden_dim_2, 1)
+        self.dense3 = nn.Linear(2, 1)
 
-    def forward(self, x):
+    def forward(self, x, x2):
         embedded = self.embedding(x)
-        self_attention = self.self_attention(embedded)
-        dense1 = self.dense1(self_attention)
+        # self_attention = self.self_attention(embedded)
+        dense1 = self.dense1(embedded)
         act1 = F.relu(dense1)
         dense2 = self.dense2(act1)
-        risk_score = torch.sigmoid(dense2)
+        cat = torch.cat((dense2, x2), dim=1)
+        dense3 = self.dense3(cat)
+        risk_score = torch.sigmoid(dense3)
         return risk_score
