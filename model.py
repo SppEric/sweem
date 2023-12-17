@@ -24,42 +24,29 @@ class SelfAttResNet(nn.Module):
         out = F.relu(out)
         return out
 
-class SWEEMv2(nn.Module):
-    def __init__(self, rna_dim, scna_dim, methy_dim):
-        super(SWEEMv2, self).__init__()
-        self.rna_att = SelfAttResNet(rna_dim)
-        self.scna_att = SelfAttResNet(scna_dim)
-        self.methyl_att = SelfAttResNet(methy_dim)
-        self.cross_att = SelfAttResNet(rna_dim + scna_dim + methy_dim)
-        self.dense = nn.Linear(rna_dim + scna_dim + methy_dim + 1, 1)
-
-    def forward(self, rna, scna, methy, event):
-        rna_att = self.rna_att(rna)
-        scna_att = self.scna_att(scna)
-        methy_att = self.methyl_att(methy)
-        cat = torch.cat((rna_att, scna_att, methy_att), dim=1)
-        # cross_att = self.cross_att(cat)
-        cat = torch.cat((cat, event), dim=1)
-        out = self.dense(cat)
-        out = F.sigmoid(out)
-        return out
-
 class SWEEM(nn.Module):
-    def __init__(self, rna_dim, scna_dim, methy_dim):
+    def __init__(self, rna_dim, scna_dim, methy_dim, hidden_dim, self_att, cross_att):
         super(SWEEM, self).__init__()
+        self.self_att = self_att
+        self.cross_att = cross_att
         self.rna_att = SelfAttResNet(rna_dim)
         self.scna_att = SelfAttResNet(scna_dim)
         self.methyl_att = SelfAttResNet(methy_dim)
         self.cross_att = SelfAttResNet(rna_dim + scna_dim + methy_dim)
-        self.dense = nn.Linear(rna_dim + scna_dim + methy_dim + 1, 1)
+        self.dense1 = nn.Linear(rna_dim + scna_dim + methy_dim + 1, hidden_dim)
+        self.dense2 = nn.Linear(hidden_dim, 1)
 
     def forward(self, rna, scna, methy, event):
-        rna_att = self.rna_att(rna)
-        scna_att = self.scna_att(scna)
-        methy_att = self.methyl_att(methy)
-        cat = torch.cat((rna_att, scna_att, methy_att), dim=1)
-        # cross_att = self.cross_att(cat)
+        if self.self_att:
+            rna = self.rna_att(rna)
+            scna = self.scna_att(scna)
+            methy = self.methyl_att(methy)
+        cat = torch.cat((rna, scna, methy), dim=1)
+        if self.cross_att:
+            cat = self.cross_att(cat)
         cat = torch.cat((cat, event), dim=1)
-        out = self.dense(cat)
+        out = self.dense1(cat)
+        out = F.relu(out)
+        out = self.dense2(out)
         out = F.sigmoid(out)
         return out
