@@ -23,10 +23,10 @@ def neg_par_log_likelihood(pred, ytime, yevent):
 
     return(cost)
 
-def temp_loss_2(pred, ytime, yevent):
-    return torch.sum((pred-yevent)**2)
-
 def temp_loss(pred, ytime, yevent):
+    return torch.mean((pred-yevent)**2)
+
+def temp_loss_2(pred, ytime, yevent):
     """
     Calculate the negative partial log likelihood for survival analysis.
     
