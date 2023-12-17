@@ -31,19 +31,19 @@ def temp_loss(pred, ytime, yevent):
     # good c_index = 1
     # bad c_index = 0
     c_index = concordance_index(pred, yevent, ytime)
-    c_index_loss = -torch.log(c_index + 0.0001)
+    c_index_loss = -torch.log(c_index + 1e-9)
     
     # good brier = 0
     # bad brier = 1
-    brier = brier_score(pred, yevent)
-    brier_loss = -torch.log((1-brier) + 0.0001)
+    # brier = brier_score(pred, yevent)
+    # brier_loss = -torch.log((1-brier) + 1e-9)
     
     print("c_index: ", c_index)
     print("c_index_loss: ", c_index_loss)
-    print("brier: ", brier)
-    print("brier_loss: ", brier_loss)
+    # print("brier: ", brier)
+    # print("brier_loss: ", brier_loss)
     
-    loss = c_index_loss + brier_loss
+    loss = c_index_loss # + brier_loss
     
     return loss
 
