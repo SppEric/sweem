@@ -24,9 +24,9 @@ def concordance_index(risk_scores, events, times):
 
     # Handle case where there are no permissible pairs
     if permissible_count > 0:
-        return concordant_count / permissible_count
+        return torch.tensor(concordant_count / permissible_count, dtype=torch.float32, requires_grad=True)
     else:
-        return torch.tensor(0.5, dtype=torch.float32)
+        return torch.tensor(0.5, dtype=torch.float32, requires_grad=True)
 
 def brier_score(risk_scores, events):
     """
