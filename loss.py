@@ -1,4 +1,5 @@
 import torch
+from metrics import *
 
 def R_set(x):
     n_sample = x.size(0)
@@ -24,7 +25,27 @@ def neg_par_log_likelihood(pred, ytime, yevent):
     return(cost)
 
 def temp_loss(pred, ytime, yevent):
-    return torch.mean((pred-yevent)**2)
+    # log(1) = 0
+    # log(0) = -inf
+    
+    # good c_index = 1
+    # bad c_index = 0
+    c_index = concordance_index(pred, yevent, ytime)
+    c_index_loss = -torch.log(c_index + 0.0001)
+    
+    # good brier = 0
+    # bad brier = 1
+    brier = brier_score(pred, yevent)
+    brier_loss = -torch.log((1-brier) + 0.0001)
+    
+    print("c_index: ", c_index)
+    print("c_index_loss: ", c_index_loss)
+    print("brier: ", brier)
+    print("brier_loss: ", brier_loss)
+    
+    loss = c_index_loss + brier_loss
+    
+    return loss
 
 def temp_loss_2(pred, ytime, yevent):
     """

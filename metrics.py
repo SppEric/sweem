@@ -1,20 +1,32 @@
-def concordance_index(risk_scores, times):
+import torch
+
+def concordance_index(risk_scores, events, times):
     """
     Calculate the concordance index given risk scores and times
     :param risk_scores: risk scores for each patient
     :param times: survival times for each patient
     :return: concordance index
     """
-    concordant_pairs = 0
-    total_pairs = 0
-    for p1_risk, p1_time in zip(risk_scores, times):
-        for p2_risk, p2_time in zip(risk_scores, times):
-            if p2_time < p1_time:
-                total_pairs += 1
-                if p2_risk > p1_risk:
-                    concordant_pairs += 1
-    c_index = concordant_pairs / total_pairs
-    return c_index
+
+    # Precompute event matrix for efficiency
+    event_matrix = events.byte().unsqueeze(1)
+
+    # Create matrices for pairwise comparison
+    risk_matrix = risk_scores.unsqueeze(1) - risk_scores.unsqueeze(0)
+    times_matrix = times.unsqueeze(1) - times.unsqueeze(0)
+
+    # Count concordant and permissible pairs
+    concordant = (risk_matrix > 0) & (times_matrix < 0) & event_matrix
+    permissible = (times_matrix < 0) & event_matrix
+
+    concordant_count = torch.sum(concordant)
+    permissible_count = torch.sum(permissible)
+
+    # Handle case where there are no permissible pairs
+    if permissible_count > 0:
+        return concordant_count / permissible_count
+    else:
+        return torch.tensor(0.5, dtype=torch.float32)
 
 def brier_score(risk_scores, events):
     """
@@ -23,8 +35,4 @@ def brier_score(risk_scores, events):
     :param events: events for each patient
     :return: Brier score
     """
-    brier_score = 0
-    for risk_score, event in zip(risk_scores, events):
-        brier_score += (risk_score - event) ** 2
-    brier_score = brier_score / len(risk_scores)
-    return brier_score
+    return torch.mean((risk_scores - events) ** 2)
