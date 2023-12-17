@@ -34,13 +34,15 @@ class SWEEM(nn.Module):
                  use_methy, 
                  hidden_dim, 
                  self_att, 
-                 cross_att):
+                 cross_att,
+                 device):
         super(SWEEM, self).__init__()
         self.use_rna = use_rna
         self.use_scna = use_scna
         self.use_methy = use_methy
         self.self_att = self_att
         self.cross_att = cross_att
+        self.device = device
         
         if self_att:
             if use_rna:
@@ -65,7 +67,7 @@ class SWEEM(nn.Module):
         self.dense2 = nn.Linear(hidden_dim, 1)
 
     def forward(self, event, **kwargs):
-        cat = torch.tensor([])
+        cat = torch.tensor([]).to(self.device)
         
         if self.self_att:
             if self.use_rna:
@@ -77,6 +79,14 @@ class SWEEM(nn.Module):
             if self.use_methy:
                 methy = self.methyl_att(kwargs['methy'])
                 cat = torch.cat((cat, methy), dim=1)
+        else:
+            if self.use_rna:
+                cat = torch.cat((cat, kwargs['rna']), dim=1)
+            if self.use_scna:
+                cat = torch.cat((cat, kwargs['scna']), dim=1)
+            if self.use_methy:
+                cat = torch.cat((cat, kwargs['methy']), dim=1)
+
                 
         if self.cross_att:
             cat = self.cross_att(cat)
