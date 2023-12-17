@@ -43,7 +43,7 @@ def load(path, model_class, optimizer_class):
     model = model_class(**settings['model'])
     model.load_state_dict(checkpoint['model_state_dict'])
 
-    optimizer = optimizer_class(model.parameters(), lr=settings['train']['lr'])
+    optimizer = optimizer_class(model.parameters(), lr=settings['train']['lr'], weight_decay=settings['train']['l2'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
     epoch_train_losses = checkpoint.get('epoch_train_losses', [])
