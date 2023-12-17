@@ -25,29 +25,62 @@ class SelfAttResNet(nn.Module):
         return out
 
 class SWEEM(nn.Module):
-    def __init__(self, rna_dim, scna_dim, methy_dim, hidden_dim, self_att, cross_att):
+    def __init__(self, 
+                 rna_dim, 
+                 scna_dim, 
+                 methy_dim, 
+                 use_rna,
+                 use_scna,
+                 use_methy, 
+                 hidden_dim, 
+                 self_att, 
+                 cross_att):
         super(SWEEM, self).__init__()
+        self.use_rna = use_rna
+        self.use_scna = use_scna
+        self.use_methy = use_methy
         self.self_att = self_att
         self.cross_att = cross_att
+        
         if self_att:
-            self.rna_att = SelfAttResNet(rna_dim) 
-            self.scna_att = SelfAttResNet(scna_dim)
-            self.methyl_att = SelfAttResNet(methy_dim)
+            if use_rna:
+                self.rna_att = SelfAttResNet(rna_dim) 
+            if use_scna:
+                self.scna_att = SelfAttResNet(scna_dim)
+            if use_methy:
+                self.methyl_att = SelfAttResNet(methy_dim)
+        
+        total_dim = 0
+        if use_rna:
+            total_dim += rna_dim
+        if use_scna:
+            total_dim += scna_dim
+        if use_methy:
+            total_dim += methy_dim
         
         if cross_att:
-            self.cross_att = SelfAttResNet(rna_dim + scna_dim + methy_dim)
+            self.cross_att = SelfAttResNet(total_dim)
 
-        self.dense1 = nn.Linear(rna_dim + scna_dim + methy_dim + 1, hidden_dim)
+        self.dense1 = nn.Linear(total_dim + 1, hidden_dim)
         self.dense2 = nn.Linear(hidden_dim, 1)
 
-    def forward(self, rna, scna, methy, event):
+    def forward(self, event, **kwargs):
+        cat = torch.tensor([])
+        
         if self.self_att:
-            rna = self.rna_att(rna)
-            scna = self.scna_att(scna)
-            methy = self.methyl_att(methy)
-        cat = torch.cat((rna, scna, methy), dim=1)
+            if self.use_rna:
+                rna = self.rna_att(kwargs['rna'])
+                cat = torch.cat((cat, rna), dim=1)
+            if self.use_scna:
+                scna = self.scna_att(kwargs['scna'])
+                cat = torch.cat((cat, scna), dim=1)
+            if self.use_methy:
+                methy = self.methyl_att(kwargs['methy'])
+                cat = torch.cat((cat, methy), dim=1)
+                
         if self.cross_att:
             cat = self.cross_att(cat)
+            
         cat = torch.cat((cat, event), dim=1)
         out = self.dense1(cat)
         out = F.relu(out)
