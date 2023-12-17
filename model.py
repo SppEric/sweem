@@ -29,10 +29,14 @@ class SWEEM(nn.Module):
         super(SWEEM, self).__init__()
         self.self_att = self_att
         self.cross_att = cross_att
-        self.rna_att = SelfAttResNet(rna_dim)
-        self.scna_att = SelfAttResNet(scna_dim)
-        self.methyl_att = SelfAttResNet(methy_dim)
-        self.cross_att = SelfAttResNet(rna_dim + scna_dim + methy_dim)
+        if self_att:
+            self.rna_att = SelfAttResNet(rna_dim) 
+            self.scna_att = SelfAttResNet(scna_dim)
+            self.methyl_att = SelfAttResNet(methy_dim)
+        
+        if cross_att:
+            self.cross_att = SelfAttResNet(rna_dim + scna_dim + methy_dim)
+
         self.dense1 = nn.Linear(rna_dim + scna_dim + methy_dim + 1, hidden_dim)
         self.dense2 = nn.Linear(hidden_dim, 1)
 
