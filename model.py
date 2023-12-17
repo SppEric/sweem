@@ -67,32 +67,46 @@ class SWEEM(nn.Module):
         self.dense2 = nn.Linear(hidden_dim, 1)
 
     def forward(self, event, **kwargs):
+        if self.use_rna:
+            rna = kwargs['rna']
+            rna = torch.nn.Dropout(p=0.8)(rna)
+        if self.use_scna:
+            scna = kwargs['scna']
+            scna = torch.nn.Dropout(p=0.8)(scna)
+        if self.use_methy:
+            methy = kwargs['methy']
+            methy = torch.nn.Dropout(p=0.8)(methy)
+            
         cat = torch.tensor([]).to(self.device)
         
         if self.self_att:
             if self.use_rna:
-                rna = self.rna_att(kwargs['rna'])
+                rna = self.rna_att(rna)
+                rna = torch.nn.Dropout(p=0.5)(rna)
                 cat = torch.cat((cat, rna), dim=1)
             if self.use_scna:
-                scna = self.scna_att(kwargs['scna'])
+                scna = self.scna_att(scna)
+                scna = torch.nn.Dropout(p=0.5)(scna)
                 cat = torch.cat((cat, scna), dim=1)
             if self.use_methy:
-                methy = self.methyl_att(kwargs['methy'])
+                methy = self.methyl_att(methy)
+                methy = torch.nn.Dropout(p=0.5)(methy)
                 cat = torch.cat((cat, methy), dim=1)
         else:
             if self.use_rna:
-                cat = torch.cat((cat, kwargs['rna']), dim=1)
+                cat = torch.cat((cat, rna), dim=1)
             if self.use_scna:
-                cat = torch.cat((cat, kwargs['scna']), dim=1)
+                cat = torch.cat((cat, scna), dim=1)
             if self.use_methy:
-                cat = torch.cat((cat, kwargs['methy']), dim=1)
+                cat = torch.cat((cat, methy), dim=1)
 
-                
         if self.cross_att:
             cat = self.cross_att(cat)
+            cat = torch.nn.Dropout(p=0.5)(cat)
             
         cat = torch.cat((cat, event), dim=1)
         out = self.dense1(cat)
+        out = torch.nn.Dropout(p=0.5)(out)
         out = F.relu(out)
         out = self.dense2(out)
         out = F.sigmoid(out)
