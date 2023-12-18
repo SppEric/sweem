@@ -12,19 +12,19 @@ on all genes. As an input, takes in a list of attention weights for each gene.
 Args:
     gene_attention (list of float): Attention weights for each gene.
 '''
-def generateHeatmap(gene_attention):
+def generateHeatmap(gene_attention, name="Pathway Module Genes"):
     fig, (ax_heatmap, ax_line) = plt.subplots(2, 1, figsize=(12, 8), gridspec_kw={'height_ratios': [4, 1]})
 
     # Create a 1D heatmap
     sns.heatmap([gene_attention], cmap="YlGnBu", cbar=False, ax=ax_heatmap)
     ax_heatmap.set_yticks([])  # Remove y-axis ticks
-    ax_heatmap.set_title("1D Heatmap of Pathway Module Genes")
+    ax_heatmap.set_title(f"1D Heatmap of {name}")
 
     # Create a line graph
     ax_line.plot(gene_attention, color='blue')
     ax_line.set_xlabel("Index")
     ax_line.set_ylabel("Amplitude")
-    ax_line.set_title("Line Graph of Pathway Module Genes")
+    ax_line.set_title(f"Line Graph of {name}")
 
     # Show the plot
     plt.tight_layout()
