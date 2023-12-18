@@ -32,7 +32,7 @@ def save(path, model, settings, optimizer=None, epoch_train_losses=None, epoch_v
         print(f"Training model saved to {path}")
 
 
-def load(path, model_class, optimizer_class=None, inference=False):
+def load(path, model_class, device=None, optimizer_class=None, inference=False):
     """
     Loads a PyTorch model and its settings from the specified path. Optionally loads the optimizer, training/validation 
     losses if not in inference mode.
@@ -53,6 +53,8 @@ def load(path, model_class, optimizer_class=None, inference=False):
     """
     checkpoint = torch.load(path)
     settings = checkpoint['settings']
+    if device:
+        settings['model']['device'] = device
 
     model = model_class(**settings['model'])
     model.load_state_dict(checkpoint['model_state_dict'])

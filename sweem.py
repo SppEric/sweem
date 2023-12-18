@@ -75,13 +75,11 @@ with torch.no_grad():
         break
 
 # save and load for training
-
 checkpoint.save("./sweem.model", model, settings, optimizer, epoch_train_losses, epoch_val_losses, inference=False)
 
-model, settings, optimizer, epoch_train_losses, epoch_val_losses = checkpoint.load("./sweem.model", SWEEM, optim.Adam, inference=False)
+model, settings, optimizer, epoch_train_losses, epoch_val_losses = checkpoint.load("./sweem.model", SWEEM, device, optim.Adam, inference=False)
 
 # save and load for inference
-
 checkpoint.save("./sweem_inf.model", model, settings, inference=True)
 
-model, settings = checkpoint.load("./sweem_inf.model", SWEEM, inference=True)
+model, settings = checkpoint.load("./sweem_inf.model", SWEEM, device, inference=True)
