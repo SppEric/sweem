@@ -14,7 +14,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Running on", device)
 
 # dataloaders
-train_dataloader, test_dataloader = data.get_train_test()
+train_dataloader, test_dataloader = data.get_train_test(batch_size=32)
 
 # settings
 settings = {
