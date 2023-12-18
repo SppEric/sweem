@@ -39,12 +39,18 @@ settings = {
 # dataloaders
 train_dataloader, test_dataloader = data.get_train_test(path='./Data/OmicsData/data.csv', batch_size=settings["train"]["batch_size"])
 
-# model
-model = SWEEM(**settings["model"])
-model.to(device)
+## FIRST TIME SETUP ##
+# # model
+# model = SWEEM(**settings["model"])
+# model.to(device)
 
-# optimizer
-optimizer = optim.Adam(model.parameters(), lr=settings["train"]["lr"], weight_decay=settings["train"]["l2"])
+# # optimizer
+# optimizer = optim.Adam(model.parameters(), lr=settings["train"]["lr"], weight_decay=settings["train"]["l2"])
+
+## RETRAINING MODEL ##
+model, settings, optimizer, epoch_train_losses, epoch_val_losses = checkpoint.load("./sweem.model", SWEEM, device, optim.Adam, inference=False)
+
+print(settings)
 
 # binary cross entropy loss
 criterion = nn.BCELoss()
