@@ -101,27 +101,32 @@ if __name__ == "__main__":
     # settings
     settings = {
         "model": {
-            "hidden_dim": 256,
+            "hidden_dim": 128,
             "device": device
         },
         "train": {
-            "batch_size": 32,
+            "batch_size": 16,
             "lr": 0.00001,
             "l2": 1e-5,
-            "epochs": 501,
-            "epoch_mod": 50
+            "epochs": 201,
+            "epoch_mod": 10
         }
     }
 
     # dataloaders
     train_dataloader, test_dataloader = data.get_train_test(path='./Data/PM_OmicsData/data.csv', batch_size=settings["train"]["batch_size"])
 
-    # model
-    model = PathwayModuleAtt(**settings["model"])
-    model.to(device)
+    ## FIRST TIME SETUP ##
 
-    # optimizer
-    optimizer = optim.Adam(model.parameters(), lr=settings["train"]["lr"], weight_decay=settings["train"]["l2"])
+    # # model
+    # model = PathwayModuleAtt(**settings["model"])
+    # model.to(device)
+
+    # # optimizer
+    # optimizer = optim.Adam(model.parameters(), lr=settings["train"]["lr"], weight_decay=settings["train"]["l2"])
+
+    ## RETRAINING MODEL ##
+    model, settings, optimizer, epoch_train_losses, epoch_val_losses = checkpoint.load("./PM.model", PathwayModuleAtt, device, optim.Adam, inference=False)
 
     # binary cross entropy loss
     criterion = nn.BCELoss()

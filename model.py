@@ -122,7 +122,9 @@ class PathwayModuleAtt(nn.Module):
     
     def forward(self, x):
         assert(x.shape[1] == 2580)
+        out = self.self_att(x)
         out = self.dense1(x)
+        out = torch.nn.Dropout(p=0.5)(out)
         out = F.relu(out)
         out = self.dense2(out)
         out = F.sigmoid(out)
