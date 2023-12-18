@@ -13,9 +13,6 @@ import checkpoint
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Running on", device)
 
-# dataloaders
-train_dataloader, test_dataloader = data.get_train_test(batch_size=32)
-
 # settings
 settings = {
     "model": {
@@ -31,12 +28,16 @@ settings = {
         "device": device
     },
     "train": {
+        "batch_size": 32,
         "lr": 0.0001,
         "l2": 1e-5,
         "epochs": 5,
         "epoch_mod": 1
     }
 }
+
+# dataloaders
+train_dataloader, test_dataloader = data.get_train_test(batch_size=settings["train"]["batch_size"])
 
 # model
 model = SWEEM(**settings["model"])
