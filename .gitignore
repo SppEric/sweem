@@ -1,3 +1,2 @@
 # Ignore model files 
-sweem.model
-sweem_inference.model
+*.model

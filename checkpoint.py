@@ -26,6 +26,11 @@ def save(path, model, settings, optimizer=None, epoch_train_losses=None, epoch_v
 
     torch.save(save_content, path)
 
+    if inference:
+        print(f"Inference model saved to {path}")
+    else:
+        print(f"Training model saved to {path}")
+
 
 def load(path, model_class, optimizer_class=None, inference=False):
     """
@@ -57,6 +62,8 @@ def load(path, model_class, optimizer_class=None, inference=False):
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         epoch_train_losses = checkpoint.get('epoch_train_losses', [])
         epoch_val_losses = checkpoint.get('epoch_val_losses', [])
+        print(f"Training model loaded from {path}")
         return model, settings, optimizer, epoch_train_losses, epoch_val_losses
 
+    print(f"Inference model loaded from {path}")
     return model, settings
