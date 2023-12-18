@@ -1,3 +1,0 @@
-def getEventAccuracy(model, inputs, events):
-    # TODO
-    ...
