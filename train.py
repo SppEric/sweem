@@ -19,8 +19,8 @@ def train(model, settings, optimizer, criterion, train_dataloader, test_dataload
 
             outputs = model(event, rna=rna, scna=scna, methy=methy)
             
-            # loss = criterion(outputs, time, event)
-            loss = criterion(outputs, event)
+            loss = criterion(outputs, time, event)
+            # loss = criterion(outputs, event)
             loss.backward()
             
             optimizer.step()
@@ -39,8 +39,8 @@ def train(model, settings, optimizer, criterion, train_dataloader, test_dataload
                 event = batchY[:,1].reshape(-1, 1).to(device)
                 outputs = model(event, rna=rna, scna=scna, methy=methy)
 
-                # loss = criterion(outputs, time, event)
-                loss = criterion(outputs, event)
+                loss = criterion(outputs, time, event)
+                # loss = criterion(outputs, event)
                 epoch_val_loss += loss.item()
 
         # Save and print losses
