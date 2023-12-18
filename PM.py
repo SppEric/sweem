@@ -92,76 +92,78 @@ def train(model, settings, optimizer, criterion, train_dataloader, test_dataload
     
     return epoch_train_losses, epoch_val_losses
 
-# device
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print("Running on", device)
+if __name__ == "__main__":
 
-# settings
-settings = {
-    "model": {
-        "hidden_dim": 128,
-        "device": device
-    },
-    "train": {
-        "batch_size": 32,
-        "lr": 0.00001,
-        "l2": 1e-5,
-        "epochs": 201,
-        "epoch_mod": 10
+    # device
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("Running on", device)
+
+    # settings
+    settings = {
+        "model": {
+            "hidden_dim": 256,
+            "device": device
+        },
+        "train": {
+            "batch_size": 32,
+            "lr": 0.00001,
+            "l2": 1e-5,
+            "epochs": 501,
+            "epoch_mod": 50
+        }
     }
-}
 
-# dataloaders
-train_dataloader, test_dataloader = data.get_train_test(path='./Data/PM_OmicsData/data.csv', batch_size=settings["train"]["batch_size"])
+    # dataloaders
+    train_dataloader, test_dataloader = data.get_train_test(path='./Data/PM_OmicsData/data.csv', batch_size=settings["train"]["batch_size"])
 
-# model
-model = PathwayModuleAtt(**settings["model"])
-model.to(device)
+    # model
+    model = PathwayModuleAtt(**settings["model"])
+    model.to(device)
 
-# optimizer
-optimizer = optim.Adam(model.parameters(), lr=settings["train"]["lr"], weight_decay=settings["train"]["l2"])
+    # optimizer
+    optimizer = optim.Adam(model.parameters(), lr=settings["train"]["lr"], weight_decay=settings["train"]["l2"])
 
-# binary cross entropy loss
-criterion = nn.BCELoss()
+    # binary cross entropy loss
+    criterion = nn.BCELoss()
 
-# train the model
-epoch_train_losses, epoch_val_losses = train(model, settings, optimizer, criterion, train_dataloader, test_dataloader, device)
+    # train the model
+    epoch_train_losses, epoch_val_losses = train(model, settings, optimizer, criterion, train_dataloader, test_dataloader, device)
 
-# Sanity Check
-model.eval()
-with torch.no_grad():
-    pathway_module = torch.Tensor(get_pathway_module()).to(device)
-    for (batchX, batchY) in test_dataloader:
-        batchX = batchX.to(device)
-        rna = batchX[:, :4801]
-        scna = batchX[:, 4801:9602]
-        methy = batchX[:, 9602:]
-        time = batchY[:,0].reshape(-1, 1).to(device)
-        event = batchY[:,1].reshape(-1, 1).to(device)
-        
-        rna = torch.matmul(rna, pathway_module)
-        scna = torch.matmul(scna, pathway_module)
-        methy = torch.matmul(methy, pathway_module)
-        
-        x = torch.cat((rna, scna, methy), dim=1)
-        outputs = model(x)
-        
-        # concat torch tensors
-        table = torch.cat((time, event, outputs), 1)
-        
-        # print row by row
-        print("Sanity Check:")
-        print("time, event, predicted")
-        for row in table:
-            print(row.tolist())
-        break
+    # Sanity Check
+    model.eval()
+    with torch.no_grad():
+        pathway_module = torch.Tensor(get_pathway_module()).to(device)
+        for (batchX, batchY) in test_dataloader:
+            batchX = batchX.to(device)
+            rna = batchX[:, :4801]
+            scna = batchX[:, 4801:9602]
+            methy = batchX[:, 9602:]
+            time = batchY[:,0].reshape(-1, 1).to(device)
+            event = batchY[:,1].reshape(-1, 1).to(device)
+            
+            rna = torch.matmul(rna, pathway_module)
+            scna = torch.matmul(scna, pathway_module)
+            methy = torch.matmul(methy, pathway_module)
+            
+            x = torch.cat((rna, scna, methy), dim=1)
+            outputs = model(x)
+            
+            # concat torch tensors
+            table = torch.cat((time, event, outputs), 1)
+            
+            # print row by row
+            print("Sanity Check:")
+            print("time, event, predicted")
+            for row in table:
+                print(row.tolist())
+            break
 
-# save and load for training
-checkpoint.save("./PM.model", model, settings, optimizer, epoch_train_losses, epoch_val_losses, inference=False)
+    # save and load for training
+    checkpoint.save("./PM.model", model, settings, optimizer, epoch_train_losses, epoch_val_losses, inference=False)
 
-model, settings, optimizer, epoch_train_losses, epoch_val_losses = checkpoint.load("./PM.model", PathwayModuleAtt, device, optim.Adam, inference=False)
+    model, settings, optimizer, epoch_train_losses, epoch_val_losses = checkpoint.load("./PM.model", PathwayModuleAtt, device, optim.Adam, inference=False)
 
-# save and load for inference
-checkpoint.save("./PM_inf.model", model, settings, inference=True)
+    # save and load for inference
+    checkpoint.save("./PM_inf.model", model, settings, inference=True)
 
-model, settings = checkpoint.load("./PM_inf.model", PathwayModuleAtt, device, inference=True)
+    model, settings = checkpoint.load("./PM_inf.model", PathwayModuleAtt, device, inference=True)
