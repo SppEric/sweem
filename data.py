@@ -3,13 +3,13 @@ from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def get_train_test(batch_size=32):
+def get_train_test(path, batch_size=32):
     # Number of genes in rna: 5540
     # Number of genes in scna: 5507
     # Number of genes in methy: 4846
     # Total number of genes: 15893
     # Total number of samples in the final dataset: 475
-    data = pd.read_csv('./Data/OmicsData/data.csv')
+    data = pd.read_csv(path)
 
     # Separate to make sure that there's an even distribution of 1s and 0s in train and test
     # 352 0's

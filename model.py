@@ -111,3 +111,19 @@ class SWEEM(nn.Module):
         out = self.dense2(out)
         out = F.sigmoid(out)
         return out
+
+class PathwayModuleAtt(nn.Module):
+    def __init__(self, hidden_dim, device):
+        super(PathwayModuleAtt, self).__init__()
+        self.device = device
+        self.self_att = SelfAttResNet(2580)
+        self.dense1 = nn.Linear(2580, hidden_dim)
+        self.dense2 = nn.Linear(hidden_dim, 1)
+    
+    def forward(self, x):
+        assert(x.shape[1] == 2580)
+        out = self.dense1(x)
+        out = F.relu(out)
+        out = self.dense2(out)
+        out = F.sigmoid(out)
+        return out

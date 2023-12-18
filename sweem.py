@@ -37,7 +37,7 @@ settings = {
 }
 
 # dataloaders
-train_dataloader, test_dataloader = data.get_train_test(batch_size=settings["train"]["batch_size"])
+train_dataloader, test_dataloader = data.get_train_test(path='./Data/OmicsData/data.csv', batch_size=settings["train"]["batch_size"])
 
 # model
 model = SWEEM(**settings["model"])
